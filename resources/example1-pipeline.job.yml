@@ -9,7 +9,7 @@ resources:
           unit: DAYS
       email_notifications:
         on_failure:
-          - magnus.pierre@databricks.com
+          - <your>.<email>@databricks.com
       tasks:
         - task_key: check-previous-load
           sql_task:
