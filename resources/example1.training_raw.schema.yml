@@ -1,0 +1,5 @@
+resources:
+  schemas:
+    training-raw:
+      name: training_raw
+      catalog_name: magnusp_catalog

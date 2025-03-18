@@ -1,0 +1,25 @@
+resources:
+  pipelines:
+    example1:
+      name: Example1
+      libraries:
+        - notebook:
+            path: ../src/DLT Pipeline 1.py
+        - notebook:
+            path: ../src/DLT Code 2.sql
+        - notebook:
+            path: ../src/SCD's.py
+      schema: ${resources.schemas.training.name}
+      serverless: true
+      budget_policy_id: 4f55caad-9470-493b-8f40-d2ccd4b638e9
+      catalog: ${resources.schemas.training.catalog_name}
+      channel: CURRENT
+      photon: true
+      development: true
+      configuration:
+        Example1.schema_path: "/Volumes/${resources.schemas.training.catalog_name}/${resources.schemas.training.name}/source/schemas/plans"
+        Example1.file_path: "/Volumes/${resources.schemas.training.catalog_name}/${resources.schemas.training.name}/source/plans.json"
+        Example1.volume_path: "/Volumes/${resources.schemas.training.catalog_name}/${resources.schemas.training.name}/source"
+        Example1.schema_raw: ${resources.schemas.training-raw.name}
+  
+

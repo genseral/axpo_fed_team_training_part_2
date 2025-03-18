@@ -1,0 +1,5 @@
+resources:
+  schemas:
+    training-silver:
+      name: training_silver
+      catalog_name: magnusp_catalog

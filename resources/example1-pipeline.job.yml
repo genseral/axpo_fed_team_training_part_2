@@ -1,0 +1,64 @@
+resources:
+  jobs:
+    dlt_example_1:
+      name: dlt_example_1
+      trigger:
+        # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
+        periodic:
+          interval: 1
+          unit: DAYS
+      email_notifications:
+        on_failure:
+          - magnus.pierre@databricks.com
+      tasks:
+        - task_key: check-previous-load
+          sql_task:
+            file:
+              path: ../src/test.sql
+              source: WORKSPACE
+            warehouse_id: 148ccb90800933a1
+        - task_key: init_task
+          depends_on:
+            - task_key: check-previous-load
+          run_if: ALL_FAILED
+          job_cluster_key: job_cluster
+          notebook_task:
+            notebook_path: ../src/init.ipynb
+        - task_key: refresh_pipeline
+          depends_on:
+            - task_key: init_task
+            - task_key: check-previous-load
+          run_if: AT_LEAST_ONE_SUCCESS
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.example1.id}
+        - task_key: generate-views
+          depends_on: 
+          - task_key: refresh_pipeline
+          notebook_task:
+            notebook_path: ../src/Generate views.py
+      parameters:
+        - name: catalog_name
+          default:  "${resources.schemas.training.catalog_name}"
+        - name: volume_path
+          default: "/Volumes/${resources.volumes.my_volume.catalog_name}/${resources.schemas.training.name}/source"
+        - name: target_schema
+          default: "${resources.schemas.training-raw.name}"
+        - name: source_schema
+          default: "${resources.schemas.training.name}"
+        - name: target_bronze
+          default: "${resources.schemas.training-bronze.name}"
+        - name: target_silver
+          default: "${resources.schemas.training-silver.name}"
+        - name: target_gold
+          default: "${resources.schemas.training-gold.name}"
+        
+      job_clusters:
+        - job_cluster_key: job_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            node_type_id: Standard_D3_v2
+            kind: CLASSIC_PREVIEW
+            data_security_mode: DATA_SECURITY_MODE_DEDICATED
+            autoscale:
+                min_workers: 1
+                max_workers: 4
